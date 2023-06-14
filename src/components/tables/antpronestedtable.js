@@ -197,7 +197,6 @@ export const AntProNestedTable = () => {
 
   const setModalButton = (bDisabled) => {
     confirmModal.update({
-      title: '업데이트',
       okButtonProps:{
         disabled: bDisabled,
       },
