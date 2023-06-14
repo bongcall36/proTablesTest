@@ -2,10 +2,11 @@ import { Children, useRef, useState, useEffect, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { DownOutlined, SearchOutlined } from '@ant-design/icons';
 import { ProProvider, ProTable } from '@ant-design/pro-components';
-import { Button, Input, Space, Table, Tag, Divider, Radio, Badge } from 'antd';
+import { Button, Input, Space, Table, Tag, Divider, Radio, Badge, Modal } from 'antd';
 import Highlighter from 'react-highlight-words';
 
 import { AntvBasicColumnPlot } from '../charts/antvbasiccolumnplot';
+import { AntChartsModal } from '../modals/antchartsmodal';
 
 const statusMap = {
   0: {
@@ -153,6 +154,10 @@ const changeChartData = (data, xfield, yfield, xalias, yalias) => {
   return config  
 }
 
+let oriChart = 'Column', oriChartX = 'name1', oriChartY = 'containers'
+let chart = 'Column', chartX = 'name1', chartY = 'containers'
+let confirmModal = null;
+
 export const AntProNestedTable = () => {
   const [selectionType, setSelectionType] = useState('checkbox');
   const [searchText, setSearchText] = useState('');
@@ -174,15 +179,83 @@ export const AntProNestedTable = () => {
   });
   const [chartConfig, setChartConfig] = useState();
   const [tableChartShow, SetTableChartShow] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [dlgFooter, SetDlgFooter] = useState(false);
+  const [modal, contextHolder] = Modal.useModal();
+
+  const setChartCallBack = (value) => {
+    chart = value
+  }
+
+  const setChartXCallBack = (value) => {
+    chartX = value
+  }
+  
+  const setChartYCallBack = (value) => {
+    chartY = value 
+  }  
+
+  const setModalButton = (bDisabled) => {
+    confirmModal.update({
+      title: '업데이트',
+      okButtonProps:{
+        disabled: bDisabled,
+      },
+    });    
+
+  }  
+
   useEffect(() => {
     setActiveData(getDataByStatus(activeKey))
   }, [activeKey]);
 
-  const OnChartClick = () => {
-    const config = changeChartData(tableListDataSource, 'name1', 'containers', '분류', '수량')
-    SetTableChartShow(!tableChartShow)
+  const chartDataConfirm = () => {
+    confirmModal = modal.confirm({
+      title: '설정',
+      content: <AntChartsModal chartType={oriChart} initX={oriChartX} initY={oriChartY} data={tableListDataSource} chart={setChartCallBack} xfield={setChartXCallBack} yfield={setChartYCallBack} bButtonDisabled={setModalButton}/>,
+      width: '600px',
+      okText: '확인',
+      cancelText: '취소',
+      okButtonProps:{
+        disabled: true,
+      },
+      onOk: () => OnChartOkShow(),
+      onCancel: () => OnCharCanceltShow()
+    });
+  };
+
+  // const OnChartClick = () => {
+  //   const config = changeChartData(tableListDataSource, 'name1', 'containers', '분류', '수량')
+  //   setModalText('chartData - ' + 'name1 - ' + 'containers - ' + '분류 - ' + '수량');
+  //   setOpen(true)
+  // }
+
+  const OnChartOkShow = () => {
+    setOpen(false)
+    const config = changeChartData(tableListDataSource, chartX, chartY, '분류', '수량')
+    SetTableChartShow(true)
+    setChartConfig(config)
+    oriChart = chart
+    oriChartX = chartX
+    oriChartY = chartY    
+  }
+
+  const OnCharCanceltShow = () => {
+    setOpen(false)
+    const config = changeChartData(tableListDataSource, oriChartX, oriChartY, '분류', '수량')
+    SetTableChartShow(true)
+    setChartConfig(config)
+  }  
+
+  const onSetShowChart = () => {
+    const config = changeChartData(tableListDataSource, oriChartX, oriChartY, '분류', '수량')
+    SetTableChartShow(true)
     setChartConfig(config)
   }
+
+  const onSetCloseChart = () => {
+    SetTableChartShow(false)
+  }  
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -404,7 +477,7 @@ export const AntProNestedTable = () => {
         columns={columns}
         request={(params, sorter, filter) => {
           // 검색 부분 구현
-          console.log(params, sorter, filter);
+          //console.log(params, sorter, filter);
           return Promise.resolve({
             data: activeData,
             success: true,
@@ -452,9 +525,32 @@ export const AntProNestedTable = () => {
             데이터내보내기
             <DownOutlined />
           </Button>,
-          <Button key="primary" type="primary" onClick={OnChartClick}>
-            차트
-          </Button>,
+          <Space>
+            {!tableChartShow && <Button type="primary" onClick={onSetShowChart}>
+              차트 보기
+            </Button>}
+            {tableChartShow && <Button type="primary" onClick={onSetCloseChart}>
+              차트 닫기
+            </Button>}
+            <Button onClick={chartDataConfirm}>
+              차트 설정
+            </Button>
+            {contextHolder}
+          </Space>,
+          // <Modal
+          //   title="Modal 1000px width"
+          //   centered
+          //   maskClosable={false}
+          //   open={open}
+          //   onOk={() => OnChartShow()}
+          //   onCancel={() => OnChartShow()}
+          //   width={1000}
+          //   //modalRender={()=><AntChartsModal/>}
+          //   content={()=>{console.log("content")}}
+          //   footer={()=>{console.log("footer")}}
+          // >
+          //   <p>{modalText}</p>
+          // </Modal>,          
         ]}        
         rowKey="key"
         pagination={{
