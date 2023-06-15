@@ -2,24 +2,6 @@ import { Transfer, Table, Button } from 'antd';
 import { useEffect, useState } from 'react';
 
 export const AntChartsModalType = (props) => {
-  const initialData = [
-    {
-      disabled: false,
-      key: 0,
-      title: 'Column',
-      description: 'Column Chart',
-      chosen: props.chartType === 'Column' ? true : false,
-
-    },
-    {
-      disabled: false,
-      key: 1,
-      title: 'Bar',
-      description: 'Bar Chart',
-      chosen: props.chartType === 'Bar' ? true : false,
-    }
-  ]
-
   const leftTableColumns = [
     {
       dataIndex: 'title',
@@ -41,7 +23,7 @@ export const AntChartsModalType = (props) => {
     },
   ];
 
-  const [chartsType, setChartsType] = useState(initialData);
+  const [chartsType, setChartsType] = useState(props.chartTypeData);
   const [targetKeys, setTargetKeys] = useState([]);
   const [chartType, setChartType] = useState();
   const [disabled, setDisabled] = useState(false);
@@ -49,13 +31,14 @@ export const AntChartsModalType = (props) => {
 
   const onChange = (nextTargetKeys) => {
     setTargetKeys(nextTargetKeys);
-    console.log(nextTargetKeys)
     const findData = chartsType.filter((item)=> item.key === nextTargetKeys[0])
-    console.log(findData)
     if(findData.length > 0){
       props.chart(findData[0].title)
-    }else  
+      props.nextButtonDisabled(false)
+    }else{  
       props.chart('')
+      props.nextButtonDisabled(true)
+    }
   };
 
   const getChartType = () =>{

@@ -22,8 +22,6 @@ export const AntChartsModalX = (props) => {
       }
       setData(tempData)
     }
-    const tempTargetKeys = [];
-
     tempData.forEach((item)=>{
       if(props.initX !== '' && props.initX === item.title){
         tempTargetKeys.push(item.key)
@@ -33,10 +31,59 @@ export const AntChartsModalX = (props) => {
       }
     })
     setTargetKeys(tempTargetKeys);
+    if(tempTargetKeys.length > 0){
+      props.nextButtonDisabled(false)
+    }else{
+      tempData.forEach((item)=>{
+        item.disabled = false
+      })      
+      props.nextButtonDisabled(true)
+    }
+  }
+
+  const getChartYData = () =>{
+    const tempData = [];
+    let index = 0;
+    for(const [key, value] of Object.entries(props.data[0])){
+      // console.log(`${key} : ${value}`)
+      // console.log(typeof(value))
+      if(typeof(value) === 'number' && key !== 'key'){
+        const newData = {
+          key: index ++,
+          title: key,
+          disabled: false,
+        }
+        tempData.push(newData)
+      }
+      setData(tempData)
+    }
+    const tempTargetKeys = [];
+
+    tempData.forEach((item)=>{
+      if(props.initY !== '' && props.initY === item.title){
+        tempTargetKeys.push(item.key)
+      }
+      else{
+        item.disabled = true
+      }
+    })
+    setTargetKeys(tempTargetKeys); 
+    if(tempTargetKeys.length > 0){
+      props.nextButtonDisabled(false)
+    }else{
+      tempData.forEach((item)=>{
+        item.disabled = false
+      })          
+      props.nextButtonDisabled(true)
+    }       
   }
 
   useEffect(() => {
-    getChartXData();
+    const type = props.xyfieldtype()
+    if(type === 0)
+      getChartXData();
+    else if(type === 1)  
+      getChartYData();
   }, []);
 
   useEffect(() => {
@@ -69,8 +116,11 @@ export const AntChartsModalX = (props) => {
     const findData = data.filter((item)=> item.key === nextTargetKeys[0])
     if(findData.length > 0){
       props.xfield(findData[0].title)
-    }else  
+      props.nextButtonDisabled(false)
+    }else{ 
       props.xfield('')
+      props.nextButtonDisabled(true)
+    }
   };
   const onSelectChange = (sourceSelectedKeys, targetSelectedKeys) => {
     console.log('sourceSelectedKeys:', sourceSelectedKeys);

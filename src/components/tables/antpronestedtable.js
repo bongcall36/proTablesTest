@@ -5,59 +5,8 @@ import { ProProvider, ProTable } from '@ant-design/pro-components';
 import { Button, Input, Space, Table, Tag, Divider, Radio, Badge, Modal } from 'antd';
 import Highlighter from 'react-highlight-words';
 
-import { AntvBasicColumnPlot } from '../charts/antvbasiccolumnplot';
+import { AntvCharts } from '../charts/antvcharts';
 import { AntChartsModal } from '../modals/antchartsmodal';
-
-const statusMap = {
-  0: {
-    color: 'blue',
-    text: '진행중',
-  },
-  1: {
-    color: 'green',
-    text: '완료',
-  },
-  2: {
-    color: 'volcano',
-    text: '경고',
-  },
-  3: {
-    color: 'red',
-    text: '실패',
-  },
-  4: {
-    color: '',
-    text: '미완성',
-  },
-};
-
-const tableListDataSource = [];
-
-const creators = ['付小小', '曲丽丽', '林东东', '陈帅帅', '兼某某'];
-
-for (let i = 0; i < 5; i += 1) {
-  tableListDataSource.push({
-    key: i,
-    name1: 'AppName' + (i+1),
-    name2: 'AppName' + (i+1),
-    containers: Math.floor(Math.random() * 20),
-    creator: creators[Math.floor(Math.random() * creators.length)],
-    status: statusMap[Math.floor(Math.random() * 10) % 5],
-    createdAt: Date.now() - Math.floor(Math.random() * 100000),
-    fixed: 'fixed',
-  });
- 
-}
-
-const getDataByStatus=(status)=>{
-  let data = []
-  if(status === '전체'){
-    data = tableListDataSource
-  }else{
-    data = tableListDataSource.filter((data) => data.status.text === status)
-  }
-  return data
-}
 
 const expandedRowRender = () => {
   const data = [];
@@ -117,11 +66,11 @@ const renderBadge = (count, active = false) => {
     />
   );
 };
-const changeChartData = (data, xfield, yfield, xalias, yalias) => {
+const changeChartData = (data, xfield, yfield, chartAlias) => {
   //data
   //const newData = data.map(({ key, name2, creator, createdAt, fixed, status, ...rest }) => rest);
   //config
-  const config = {
+  let config = {
     data: data,
     xField: xfield,
     yField: yfield,
@@ -138,27 +87,79 @@ const changeChartData = (data, xfield, yfield, xalias, yalias) => {
         autoRotate: false,
       },
     },
-    meta: {
-      xalias: {
-        alias: xalias,
-      },
-      yalias: {
-        alias: yalias,
-      },
-    },
-  }; 
-  config.meta[xfield] = config.meta['xalias']
-  config.meta[yfield] = config.meta['yalias']
-  delete config.meta['xalias']
-  delete config.meta['yalias']
+    // meta: {
+    //   xalias: {
+    //     alias: chartAlias[xfield].alias,
+    //   },
+    //   yalias: {
+    //     alias: chartAlias[yfield].alias,
+    //   },
+    // },
+  };
+
+  // config.meta[xfield] = config.meta['xalias']
+  // config.meta[yfield] = config.meta['yalias']
+  // delete config.meta['xalias']
+  // delete config.meta['yalias']   
+  
+  if(chartAlias[xfield].alias !== '' && chartAlias[yfield].alias !== ''){
+    config = {
+      ...config,
+      meta: {
+        xalias: {
+          alias: chartAlias[xfield].alias,
+        },
+        yalias: {
+          alias: chartAlias[yfield].alias,
+        },        
+      },    
+    }
+    config.meta[xfield] = config.meta['xalias']
+    config.meta[yfield] = config.meta['yalias']
+    delete config.meta['xalias']
+    delete config.meta['yalias']    
+  }
+  else if(chartAlias[xfield].alias !== ''){
+    config = {
+      ...config,
+      meta: {
+        xalias: {
+          alias: chartAlias[xfield].alias,
+        },     
+      },    
+    }
+    config.meta[xfield] = config.meta['xalias']
+    delete config.meta['xalias']
+  }
+  else if(chartAlias[yfield].alias !== ''){
+    config = {
+      ...config,
+      meta: {
+        yalias: {
+          alias: chartAlias[yfield].alias,
+        },     
+      },    
+    } 
+    config.meta[yfield] = config.meta['yalias']
+    delete config.meta['yalias']       
+  }  
   return config  
 }
 
-let oriChart = 'Column', oriChartX = 'name1', oriChartY = 'containers'
-let chart = 'Column', chartX = 'name1', chartY = 'containers'
+let chart = '', chartX = '', chartY = ''
 let confirmModal = null;
 
-export const AntProNestedTable = () => {
+export const AntProNestedTable = (props) => {
+  const tableListDataSource = props.data
+  const chartAlias = props.chartAlias
+  let oriChart = props.defaultChart.chartType
+  let oriChartX = props.defaultChart.chartX
+  let oriChartY =  props.defaultChart.chartY
+
+  if(chart === '') chart = oriChart
+  if(chartX === '') chartX = oriChartX
+  if(chartY === '') chartY = oriChartY
+
   const [selectionType, setSelectionType] = useState('checkbox');
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
@@ -183,6 +184,16 @@ export const AntProNestedTable = () => {
   const [dlgFooter, SetDlgFooter] = useState(false);
   const [modal, contextHolder] = Modal.useModal();
 
+  const getDataByStatus=(status)=>{
+    let data = []
+    if(status === '전체'){
+      data = tableListDataSource
+    }else{
+      data = tableListDataSource.filter((data) => data.status.text === status)
+    }
+    return data
+  }
+
   const setChartCallBack = (value) => {
     chart = value
   }
@@ -201,9 +212,16 @@ export const AntProNestedTable = () => {
         disabled: bDisabled,
       },
     });    
-
   }  
 
+  const getXyFieldType = () => {
+    if(chart === 'Column')
+      return 0
+    else if(chart === 'Bar')
+      return 1
+
+  }
+  
   useEffect(() => {
     setActiveData(getDataByStatus(activeKey))
   }, [activeKey]);
@@ -211,7 +229,16 @@ export const AntProNestedTable = () => {
   const chartDataConfirm = () => {
     confirmModal = modal.confirm({
       title: '설정',
-      content: <AntChartsModal chartType={oriChart} initX={oriChartX} initY={oriChartY} data={tableListDataSource} chart={setChartCallBack} xfield={setChartXCallBack} yfield={setChartYCallBack} bButtonDisabled={setModalButton}/>,
+      content: <AntChartsModal 
+                chartType={chart} 
+                initX={chartX} 
+                initY={chartY} 
+                data={tableListDataSource} 
+                chart={setChartCallBack} 
+                xfield={setChartXCallBack} 
+                yfield={setChartYCallBack} 
+                bButtonDisabled={setModalButton}
+                getXyFieldType={getXyFieldType}/>,
       width: '600px',
       okText: '확인',
       cancelText: '취소',
@@ -223,15 +250,9 @@ export const AntProNestedTable = () => {
     });
   };
 
-  // const OnChartClick = () => {
-  //   const config = changeChartData(tableListDataSource, 'name1', 'containers', '분류', '수량')
-  //   setModalText('chartData - ' + 'name1 - ' + 'containers - ' + '분류 - ' + '수량');
-  //   setOpen(true)
-  // }
-
   const OnChartOkShow = () => {
     setOpen(false)
-    const config = changeChartData(tableListDataSource, chartX, chartY, '분류', '수량')
+    const config = changeChartData(tableListDataSource, chartX, chartY, chartAlias)
     SetTableChartShow(true)
     setChartConfig(config)
     oriChart = chart
@@ -241,13 +262,14 @@ export const AntProNestedTable = () => {
 
   const OnCharCanceltShow = () => {
     setOpen(false)
-    const config = changeChartData(tableListDataSource, oriChartX, oriChartY, '분류', '수량')
+    const config = changeChartData(tableListDataSource, oriChartX, oriChartY, chartAlias)
     SetTableChartShow(true)
     setChartConfig(config)
   }  
 
   const onSetShowChart = () => {
-    const config = changeChartData(tableListDataSource, oriChartX, oriChartY, '분류', '수량')
+    console.log(chartX)
+    const config = changeChartData(tableListDataSource, chartX, chartY, chartAlias)
     SetTableChartShow(true)
     setChartConfig(config)
   }
@@ -535,21 +557,7 @@ export const AntProNestedTable = () => {
               차트 설정
             </Button>
             {contextHolder}
-          </Space>,
-          // <Modal
-          //   title="Modal 1000px width"
-          //   centered
-          //   maskClosable={false}
-          //   open={open}
-          //   onOk={() => OnChartShow()}
-          //   onCancel={() => OnChartShow()}
-          //   width={1000}
-          //   //modalRender={()=><AntChartsModal/>}
-          //   content={()=>{console.log("content")}}
-          //   footer={()=>{console.log("footer")}}
-          // >
-          //   <p>{modalText}</p>
-          // </Modal>,          
+          </Space>,        
         ]}        
         rowKey="key"
         pagination={{
@@ -578,7 +586,7 @@ export const AntProNestedTable = () => {
         }}
       />
       <div ref={tableChartRef} id='tablechart'>
-        {tableChartShow ? <AntvBasicColumnPlot config={chartConfig}/>:null}
+        {tableChartShow ? <AntvCharts config={chartConfig} type={chart}/>:null}
       </div>
     </div>
   );
