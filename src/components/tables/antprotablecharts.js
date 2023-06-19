@@ -149,7 +149,7 @@ const changeChartData = (data, xfield, yfield, chartAlias) => {
 let chart = '', chartX = '', chartY = ''
 let confirmModal = null;
 
-export const AntProNestedTable = (props) => {
+export const AntProTableCharts = (props) => {
   const tableListDataSource = props.data
   const chartAlias = props.chartAlias
   let oriChart = props.defaultChart.chartType
@@ -221,7 +221,7 @@ export const AntProNestedTable = (props) => {
       return 1
 
   }
-  
+
   useEffect(() => {
     setActiveData(getDataByStatus(activeKey))
   }, [activeKey]);
@@ -541,11 +541,6 @@ export const AntProNestedTable = (props) => {
           },          
         }}
         toolBarRender={() => [
-          <Button key="show">로그보기</Button>,
-          <Button key="out">
-            데이터내보내기
-            <DownOutlined />
-          </Button>,
           <Space>
             {!tableChartShow && <Button type="primary" onClick={onSetShowChart}>
               차트 보기
