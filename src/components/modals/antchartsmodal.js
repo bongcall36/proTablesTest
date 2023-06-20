@@ -23,6 +23,13 @@ export const AntChartsModal = (props) => {
       title: 'Bar',
       description: 'Bar Chart',
       chosen: props.chartType === 'Bar' ? true : false,
+    },
+    {
+      disabled: false,
+      key: 2,
+      title: 'Pie',
+      description: 'Pie Chart',
+      chosen: props.chartType === 'Pie' ? true : false,
     }
   ]
 

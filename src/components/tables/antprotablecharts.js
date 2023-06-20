@@ -70,37 +70,81 @@ const changeChartData = (data, xfield, yfield, chartAlias) => {
   //data
   //const newData = data.map(({ key, name2, creator, createdAt, fixed, status, ...rest }) => rest);
   //config
-  let config = {
-    data: data,
-    xField: xfield,
-    yField: yfield,
-    label: {
-      position: 'middle',
-      style: {
-        fill: '#FFFFFF',
-        opacity: 0.6,
-      },
-    },
-    xAxis: {
-      label: {
-        autoHide: true,
-        autoRotate: false,
-      },
-    },
-    // meta: {
-    //   xalias: {
-    //     alias: chartAlias[xfield].alias,
-    //   },
-    //   yalias: {
-    //     alias: chartAlias[yfield].alias,
-    //   },
-    // },
-  };
+  let config = {}
+  // let config = {
+  //   data: data,
+  //   xField: xfield,
+  //   yField: yfield,
+  //   label: {
+  //     position: 'middle',
+  //     style: {
+  //       fill: '#FFFFFF',
+  //       opacity: 0.6,
+  //     },
+  //   },
+  //   xAxis: {
+  //     label: {
+  //       autoHide: true,
+  //       autoRotate: false,
+  //     },
+  //   },
+  //   // meta: {
+  //   //   xalias: {
+  //   //     alias: chartAlias[xfield].alias,
+  //   //   },
+  //   //   yalias: {
+  //   //     alias: chartAlias[yfield].alias,
+  //   //   },
+  //   // },
+  // };
 
   // config.meta[xfield] = config.meta['xalias']
   // config.meta[yfield] = config.meta['yalias']
   // delete config.meta['xalias']
-  // delete config.meta['yalias']   
+  // delete config.meta['yalias']  
+  if(chart === 'Column' || chart === 'Bar'){
+    config = {
+      data: data,
+      xField: xfield,
+      yField: yfield,
+      label: {
+        position: 'middle',
+        style: {
+          fill: '#FFFFFF',
+          opacity: 0.6,
+        },
+      },
+      xAxis: {
+        label: {
+          autoHide: true,
+          autoRotate: false,
+        },
+      },
+    };
+  }
+  else if(chart == 'Pie'){
+    config = {
+      appendPadding: 10,
+      data,
+      angleField: yfield,
+      colorField: xfield,
+      radius: 0.9,
+      label: {
+        type: 'inner',
+        offset: '-30%',
+//        content: ({ percent }) => `${(percent * 100).toFixed(0)}%`,
+        style: {
+          fontSize: 14,
+          textAlign: 'center',
+        },
+      },
+      interactions: [
+        {
+          type: 'element-active',
+        },
+      ],
+    };
+  } 
   
   if(chartAlias[xfield].alias !== '' && chartAlias[yfield].alias !== ''){
     config = {
@@ -215,7 +259,7 @@ export const AntProTableCharts = (props) => {
   }  
 
   const getXyFieldType = () => {
-    if(chart === 'Column')
+    if(chart === 'Column' || chart === 'Pie')
       return 0
     else if(chart === 'Bar')
       return 1
@@ -316,7 +360,7 @@ export const AntProTableCharts = (props) => {
               width: 90,
             }}
           >
-            Search
+            검색
           </Button>
           <Button
             onClick={() => clearFilters && handleReset(clearFilters)}
@@ -325,7 +369,7 @@ export const AntProTableCharts = (props) => {
               width: 90,
             }}
           >
-            Reset
+            초기화
           </Button>
           <Button
             type="link"
@@ -338,7 +382,7 @@ export const AntProTableCharts = (props) => {
               setSearchedColumn(dataIndex);
             }}
           >
-            Filter
+            필터
           </Button>
           <Button
             type="link"
@@ -347,7 +391,7 @@ export const AntProTableCharts = (props) => {
               close();
             }}
           >
-            close
+            닫기
           </Button>
         </Space>
       </div>

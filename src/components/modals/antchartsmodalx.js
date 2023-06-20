@@ -22,6 +22,7 @@ export const AntChartsModalX = (props) => {
       }
       setData(tempData)
     }
+    const tempTargetKeys = [];
     tempData.forEach((item)=>{
       if(props.initX !== '' && props.initX === item.title){
         tempTargetKeys.push(item.key)
@@ -58,7 +59,6 @@ export const AntChartsModalX = (props) => {
       setData(tempData)
     }
     const tempTargetKeys = [];
-
     tempData.forEach((item)=>{
       if(props.initY !== '' && props.initY === item.title){
         tempTargetKeys.push(item.key)

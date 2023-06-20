@@ -7,7 +7,6 @@ export const AntChartsModalY = (props) => {
   const [selectedKeys, setSelectedKeys] = useState([]);
 
   const getChartXData = () =>{
-    console.log(props.xyfieldtype())
     const tempData = [];
     let index = 0;
     for(const [key, value] of Object.entries(props.data[0])){
@@ -24,7 +23,6 @@ export const AntChartsModalY = (props) => {
       setData(tempData)
     }
     const tempTargetKeys = [];
-
     tempData.forEach((item)=>{
       if(props.initX !== '' && props.initX === item.title){
         tempTargetKeys.push(item.key)
@@ -34,7 +32,6 @@ export const AntChartsModalY = (props) => {
       }
     })
     setTargetKeys(tempTargetKeys);
-    console.log(tempTargetKeys)
     if(tempTargetKeys.length > 0){
       props.nextButtonDisabled(false)
       props.bButtonDisabled(false)
@@ -64,7 +61,6 @@ export const AntChartsModalY = (props) => {
       setData(tempData)
     }
     const tempTargetKeys = [];
-
     tempData.forEach((item)=>{
       if(props.initY !== '' && props.initY === item.title){
         tempTargetKeys.push(item.key)
